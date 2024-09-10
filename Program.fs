@@ -1,4 +1,5 @@
-﻿open Vector
+﻿open Color
+open Vector
 
 let imageWidth = 256
 let imageHeight = 256
@@ -9,12 +10,8 @@ let header =
 255
 """
 
-let scale d = d * 255.999 |> int
-
 let logger (remaining: int) =
     eprintfn $"Scanlines remaining: {remaining}"
-
-let v = { x = 1.; y = 1.; z = 1. }
 
 let body =
     seq {
@@ -22,10 +19,11 @@ let body =
             logger (imageHeight - j)
 
             for i in 0 .. imageWidth - 1 do
-                let r = float i / float (imageWidth - 1) |> scale
-                let g = float j / float (imageHeight - 1) |> scale
-                let b = 0. |> scale
-                $"{r} {g} {b}\n"
+                let r = float i / float (imageWidth - 1)
+                let g = float j / float (imageHeight - 1)
+                let b = 0.
+                let color = { r = r; g = g; b = b }
+                $"{color}\n"
     }
     |> Seq.reduce (+)
 
