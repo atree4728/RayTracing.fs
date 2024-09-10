@@ -6,6 +6,7 @@
   <ItemGroup>
     <Compile Include="Color.fs" />
     <Compile Include="Vector.fs" />
+    <Compile Include="Ray.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 </Project>
