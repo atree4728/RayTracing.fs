@@ -1,4 +1,6 @@
-﻿let imageWidth = 256
+﻿open Vector
+
+let imageWidth = 256
 let imageHeight = 256
 
 let header =
@@ -11,6 +13,8 @@ let scale d = d * 255.999 |> int
 
 let logger (remaining: int) =
     eprintfn $"Scanlines remaining: {remaining}"
+
+let v = { x = 1.; y = 1.; z = 1. }
 
 let body =
     seq {
