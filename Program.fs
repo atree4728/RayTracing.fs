@@ -15,7 +15,7 @@ let rayColor (ray: Ray) =
             { center = { x = 0; y = 0; z = -1 }
               radius = 0.5 }
 
-    match hit interval sphere ray with
+    match tryGetHit interval sphere ray with
     | Some { point = point } ->
         let normal = point - { x = 0; y = 0; z = -1 } |> normalize
 

@@ -16,11 +16,7 @@ type Hit =
 
 type Interval = { min: float; max: float }
 
-let validate interval t =
-    let { min = min; max = max } = interval
-    if min < t && t < max then Some t else None
-
-let hit interval object ray =
+let tryGetHit interval object ray =
     match object with
     | Sphere { center = center; radius = radius } ->
         let oc = center - ray.origin
@@ -28,7 +24,12 @@ let hit interval object ray =
         let h = dot ray.direction oc
         let c = norm_squared oc - radius * radius
         let discriminant = h * h - a * c
+
         let trySqrt (f: float) = if f >= 0 then Some(sqrt f) else None
+
+        let validate interval t =
+            let { min = min; max = max } = interval
+            if min < t && t < max then Some t else None
 
         option {
             let! dSqrt = trySqrt discriminant
