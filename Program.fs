@@ -2,12 +2,28 @@
 open Vector
 open Ray
 
+let hitSphere center radius ray =
+    let oc = center - ray.origin
+    let a = dot ray.direction ray.direction
+    let b = -2. * dot ray.direction oc
+    let c = dot oc oc - radius * radius
+    let discriminant = b * b - 4. * a * c
+    discriminant >= 0
+
 let rayColor (ray: Ray) =
-    let unitDirection = normalize ray.direction
-    let scaler = (unitDirection.y + 1.) / 2.
+    let red = { r = 1; g = 0; b = 0 }
     let white = { r = 1; g = 1; b = 1 }
     let blue = { r = 0.5; g = 0.7; b = 1 }
-    (1. - scaler) * white + scaler * blue
+
+    let center = { x = 0; y = 0; z = -1 }
+    let radius = 0.5
+
+    if hitSphere center radius ray then
+        red
+    else
+        let unitDirection = normalize ray.direction
+        let scaler = (unitDirection.y + 1.) / 2.
+        (1. - scaler) * white + scaler * blue
 
 
 let imageWidth = 400
