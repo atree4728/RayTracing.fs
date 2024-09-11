@@ -11,12 +11,13 @@ type Camera =
       imageWidth: int
       imageHeight: int
       samplesPerPixel: int
+      maxDepth: int
       center: Vector
       pixel00Loc: Vector
       pixelDeltaU: Vector
       pixelDeltaV: Vector }
 
-    static member create aspectRatio imageWidth samplesPerPixel =
+    static member create aspectRatio imageWidth samplesPerPixel maxDepth =
         let imageHeight = float imageWidth / aspectRatio |> int |> max 1
         let center = { x = 0; y = 0; z = 0 }
         let aspectRatio = float imageWidth / float imageHeight
@@ -40,19 +41,22 @@ type Camera =
           imageWidth = imageWidth
           imageHeight = imageHeight
           samplesPerPixel = samplesPerPixel
+          maxDepth = maxDepth
           center = center
           pixel00Loc = pixel00Loc
           pixelDeltaU = pixelDeltaU
           pixelDeltaV = pixelDeltaV }
 
-let rec rayColor camera world ray =
+let rec rayColor camera world depth ray =
     let white = { r = 1; g = 1; b = 1 }
     let blue = { r = 0.5; g = 0.7; b = 1 }
+    let black = { r = 0; g = 0; b = 0 }
 
     let interval = { min = 0; max = infinity }
 
-    match tryGetHit interval ray world with
-    | Some { point = point; normal = normal } ->
+    match depth <= 0, tryGetHit interval ray world with
+    | true, _ -> black
+    | false, Some { point = point; normal = normal } ->
         let rng = System.Random()
         let rand () = rng.NextDouble() * 2. - 1.
 
@@ -73,9 +77,9 @@ let rec rayColor camera world ray =
             { origin = point
               direction = direction }
 
-        let color = rayColor camera world reflected
+        let color = rayColor camera world (depth - 1) reflected
         0.5 * color
-    | None ->
+    | false, None ->
         let unitDirection = normalize ray.direction
         let scaler = (unitDirection.y + 1.) / 2.
         (1. - scaler) * white + scaler * blue
@@ -111,7 +115,7 @@ let render logger camera world =
 
                             { origin = origin
                               direction = direction })
-                        |> Seq.map (rayColor camera world)
+                        |> Seq.map (rayColor camera world camera.maxDepth)
                         |> Seq.reduce (+)
 
                     let color = colors / float camera.samplesPerPixel
