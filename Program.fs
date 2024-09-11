@@ -2,13 +2,18 @@
 open Vector
 open Ray
 
-let hitSphere center radius ray =
+let tryGetCollision center radius ray =
     let oc = center - ray.origin
     let a = dot ray.direction ray.direction
     let b = -2. * dot ray.direction oc
     let c = dot oc oc - radius * radius
     let discriminant = b * b - 4. * a * c
-    discriminant >= 0
+
+    if discriminant < 0 then
+        None
+    else
+        let t = (-b - sqrt discriminant) / (2. * a)
+        if t < 0 then None else Some(point ray t)
 
 let rayColor (ray: Ray) =
     let red = { r = 1; g = 0; b = 0 }
@@ -18,9 +23,15 @@ let rayColor (ray: Ray) =
     let center = { x = 0; y = 0; z = -1 }
     let radius = 0.5
 
-    if hitSphere center radius ray then
-        red
-    else
+    match tryGetCollision center radius ray with
+    | Some point ->
+        let normal = point - { x = 0; y = 0; z = -1 } |> normalize
+
+        0.5
+        * { r = normal.x + 1.
+            g = normal.y + 1.
+            b = normal.z + 1. }
+    | None ->
         let unitDirection = normalize ray.direction
         let scaler = (unitDirection.y + 1.) / 2.
         (1. - scaler) * white + scaler * blue
