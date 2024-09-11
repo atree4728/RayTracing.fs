@@ -5,7 +5,6 @@ open Vector
 open Ray
 open Hittable
 
-
 type Camera =
     { aspectRatio: float
       imageWidth: int
@@ -52,7 +51,7 @@ let rec rayColor camera world depth ray =
     let blue = { r = 0.5; g = 0.7; b = 1 }
     let black = { r = 0; g = 0; b = 0 }
 
-    let interval = { min = 0; max = infinity }
+    let interval = { min = 0.001; max = infinity }
 
     match depth <= 0, tryGetHit interval ray world with
     | true, _ -> black
