@@ -10,12 +10,13 @@ type Camera =
     { aspectRatio: float
       imageWidth: int
       imageHeight: int
+      samplesPerPixel: int
       center: Vector
       pixel00Loc: Vector
       pixelDeltaU: Vector
       pixelDeltaV: Vector }
 
-    static member create aspectRatio imageWidth =
+    static member create aspectRatio imageWidth samplesPerPixel =
         let imageHeight = float imageWidth / aspectRatio |> int |> max 1
         let center = { x = 0; y = 0; z = 0 }
         let aspectRatio = float imageWidth / float imageHeight
@@ -38,6 +39,7 @@ type Camera =
         { aspectRatio = aspectRatio
           imageWidth = imageWidth
           imageHeight = imageHeight
+          samplesPerPixel = samplesPerPixel
           center = center
           pixel00Loc = pixel00Loc
           pixelDeltaU = pixelDeltaU
@@ -71,23 +73,30 @@ let render logger camera world =
         logger $"Scanlines remaining: {remaining}"
 
     let body =
-        let rayColor = rayColor camera world
+        let rng = System.Random()
+        let rand () = rng.NextDouble() - 0.5
 
         seq {
             for j in 0 .. camera.imageHeight - 1 do
                 logger (camera.imageHeight - j)
 
                 for i in 0 .. camera.imageWidth - 1 do
-                    let pixelCenter =
-                        camera.pixel00Loc + camera.pixelDeltaU * float i + camera.pixelDeltaV * float j
+                    let colors =
+                        Seq.init camera.samplesPerPixel (fun _ ->
+                            let pixel =
+                                camera.pixel00Loc
+                                + (float i + rand ()) * camera.pixelDeltaU
+                                + (float j + rand ()) * camera.pixelDeltaV
 
-                    let rayDirection = pixelCenter - camera.center
+                            let origin = camera.center
+                            let direction = pixel - origin
 
-                    let ray =
-                        { origin = camera.center
-                          direction = rayDirection }
+                            { origin = origin
+                              direction = direction })
+                        |> Seq.map (rayColor camera world)
+                        |> Seq.reduce (+)
 
-                    let color = rayColor ray
+                    let color = colors / float camera.samplesPerPixel
                     $"{color}\n"
         }
         |> Seq.reduce (+)

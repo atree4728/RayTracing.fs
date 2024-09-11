@@ -15,7 +15,8 @@ let world =
 let camera =
     let aspectRatio = 16. / 9.
     let imageWidth = 400
-    Camera.create aspectRatio imageWidth
+    let samplesPerPixel = 100
+    Camera.create aspectRatio imageWidth samplesPerPixel
 
 let logger = eprintfn "%s"
 let image = render logger camera world

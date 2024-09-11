@@ -20,3 +20,5 @@ type Color =
         { r = t * color.r
           g = t * color.g
           b = t * color.b }
+
+    static member inline (/)(color: Color, t) = (1. / t) * color
