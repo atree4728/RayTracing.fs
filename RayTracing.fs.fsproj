@@ -7,6 +7,10 @@
     <Compile Include="Color.fs" />
     <Compile Include="Vector.fs" />
     <Compile Include="Ray.fs" />
+    <Compile Include="Hittable.fs" />
     <Compile Include="Program.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="FsToolkit.ErrorHandling" Version="4.16.0" />
   </ItemGroup>
 </Project>

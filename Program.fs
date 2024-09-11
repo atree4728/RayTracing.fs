@@ -1,30 +1,22 @@
 ﻿open Color
 open Vector
 open Ray
-
-let tryGetCollision center radius ray =
-    let oc = center - ray.origin
-    let a = ray.direction |> norm_squared
-    let h = dot ray.direction oc
-    let c = norm_squared oc - radius * radius
-    let discriminant = h * h - a * c
-
-    if discriminant < 0 then
-        None
-    else
-        let t = (h - sqrt discriminant) / a
-        if t < 0 then None else Some(point ray t)
+open Hittable
 
 let rayColor (ray: Ray) =
     let red = { r = 1; g = 0; b = 0 }
     let white = { r = 1; g = 1; b = 1 }
     let blue = { r = 0.5; g = 0.7; b = 1 }
 
-    let center = { x = 0; y = 0; z = -1 }
-    let radius = 0.5
+    let interval = { min = 0; max = infinity }
 
-    match tryGetCollision center radius ray with
-    | Some point ->
+    let sphere =
+        Sphere
+            { center = { x = 0; y = 0; z = -1 }
+              radius = 0.5 }
+
+    match hit interval sphere ray with
+    | Some { point = point } ->
         let normal = point - { x = 0; y = 0; z = -1 } |> normalize
 
         0.5
