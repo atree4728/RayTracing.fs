@@ -35,6 +35,7 @@ let cross u v =
       y = u.z * v.x - u.x * v.z
       z = u.x * v.y - u.y * v.x }
 
-let norm v = v.x ** 2 + v.y ** 2 + v.z ** 2 |> sqrt
+let norm_squared v = v.x ** 2 + v.y ** 2 + v.z ** 2
+let norm = norm_squared >> sqrt
 
 let normalize v = v / (norm v)

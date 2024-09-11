@@ -4,15 +4,15 @@ open Ray
 
 let tryGetCollision center radius ray =
     let oc = center - ray.origin
-    let a = dot ray.direction ray.direction
-    let b = -2. * dot ray.direction oc
-    let c = dot oc oc - radius * radius
-    let discriminant = b * b - 4. * a * c
+    let a = ray.direction |> norm_squared
+    let h = dot ray.direction oc
+    let c = norm_squared oc - radius * radius
+    let discriminant = h * h - a * c
 
     if discriminant < 0 then
         None
     else
-        let t = (-b - sqrt discriminant) / (2. * a)
+        let t = (h - sqrt discriminant) / a
         if t < 0 then None else Some(point ray t)
 
 let rayColor (ray: Ray) =
