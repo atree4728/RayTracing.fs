@@ -7,7 +7,9 @@ open Ray
 
 type Sphere = { center: Vector; radius: float }
 
-type Hittable = Sphere of Sphere
+type Hittable =
+    | Sphere of Sphere
+    | Hittables of Hittable list
 
 type Hit =
     { point: Vector
@@ -16,7 +18,7 @@ type Hit =
 
 type Interval = { min: float; max: float }
 
-let tryGetHit interval object ray =
+let rec tryGetHit interval ray object =
     match object with
     | Sphere { center = center; radius = radius } ->
         let oc = center - ray.origin
@@ -42,3 +44,4 @@ let tryGetHit interval object ray =
                   normal = normal
                   t = t }
         }
+    | Hittables hittables -> hittables |> List.tryPick (tryGetHit interval ray)

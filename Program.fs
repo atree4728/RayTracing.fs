@@ -11,11 +11,13 @@ let rayColor (ray: Ray) =
     let interval = { min = 0; max = infinity }
 
     let sphere =
-        Sphere
-            { center = { x = 0; y = 0; z = -1 }
-              radius = 0.5 }
+        { center = { x = 0; y = 0; z = -1 }
+          radius = 0.5 }
+        |> Sphere
+        |> List.singleton
+        |> Hittables
 
-    match tryGetHit interval sphere ray with
+    match tryGetHit interval ray sphere with
     | Some { point = point } ->
         let normal = point - { x = 0; y = 0; z = -1 } |> normalize
 
