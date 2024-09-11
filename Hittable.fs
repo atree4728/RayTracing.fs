@@ -22,9 +22,9 @@ let rec tryGetHit interval ray object =
     match object with
     | Sphere { center = center; radius = radius } ->
         let oc = center - ray.origin
-        let a = ray.direction |> norm_squared
+        let a = ray.direction |> normSquared
         let h = dot ray.direction oc
-        let c = norm_squared oc - radius * radius
+        let c = normSquared oc - radius * radius
         let discriminant = h * h - a * c
 
         let trySqrt (f: float) = if f >= 0 then Some(sqrt f) else None

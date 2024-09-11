@@ -45,18 +45,36 @@ type Camera =
           pixelDeltaU = pixelDeltaU
           pixelDeltaV = pixelDeltaV }
 
-let rayColor camera world ray =
+let rec rayColor camera world ray =
     let white = { r = 1; g = 1; b = 1 }
     let blue = { r = 0.5; g = 0.7; b = 1 }
 
     let interval = { min = 0; max = infinity }
 
     match tryGetHit interval ray world with
-    | Some { normal = normal } ->
-        0.5
-        * { r = normal.x + 1.
-            g = normal.y + 1.
-            b = normal.z + 1. }
+    | Some { point = point; normal = normal } ->
+        let rng = System.Random()
+        let rand () = rng.NextDouble() * 2. - 1.
+
+        let reflected =
+            let direction =
+                let p =
+                    Seq.initInfinite (fun _ ->
+                        { x = rand ()
+                          y = rand ()
+                          z = rand () })
+                    |> Seq.find (fun p ->
+                        let lsq = normSquared p
+                        1e-160 < lsq && lsq <= 1)
+                    |> normalize
+
+                if dot p normal > 0 then p else -p
+
+            { origin = point
+              direction = direction }
+
+        let color = rayColor camera world reflected
+        0.5 * color
     | None ->
         let unitDirection = normalize ray.direction
         let scaler = (unitDirection.y + 1.) / 2.
