@@ -8,6 +8,7 @@
     <Compile Include="Vector.fs" />
     <Compile Include="Ray.fs" />
     <Compile Include="Hittable.fs" />
+    <Compile Include="Camera.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
