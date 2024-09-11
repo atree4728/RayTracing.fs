@@ -44,4 +44,9 @@ let rec tryGetHit interval ray object =
                   normal = normal
                   t = t }
         }
-    | Hittables hittables -> hittables |> List.tryPick (tryGetHit interval ray)
+    | Hittables hittables ->
+        hittables
+        |> List.choose (tryGetHit interval ray)
+        |> function
+            | [] -> None
+            | hits -> hits |> List.minBy _.t |> Some

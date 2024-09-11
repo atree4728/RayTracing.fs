@@ -3,24 +3,14 @@ open Vector
 open Ray
 open Hittable
 
-let rayColor (ray: Ray) =
-    let red = { r = 1; g = 0; b = 0 }
+let rayColor world ray =
     let white = { r = 1; g = 1; b = 1 }
     let blue = { r = 0.5; g = 0.7; b = 1 }
 
     let interval = { min = 0; max = infinity }
 
-    let sphere =
-        { center = { x = 0; y = 0; z = -1 }
-          radius = 0.5 }
-        |> Sphere
-        |> List.singleton
-        |> Hittables
-
-    match tryGetHit interval ray sphere with
-    | Some { point = point } ->
-        let normal = point - { x = 0; y = 0; z = -1 } |> normalize
-
+    match tryGetHit interval ray world with
+    | Some { normal = normal } ->
         0.5
         * { r = normal.x + 1.
             g = normal.y + 1.
@@ -38,6 +28,15 @@ let imageHeight =
     float imageWidth / aspectRatio |> int |> max 1
 
 let aspectRatio = float imageWidth / float imageHeight
+
+let world =
+    Hittables
+        [ Sphere
+              { center = { x = 0; y = -100.5; z = -1 }
+                radius = 100 }
+          Sphere
+              { center = { x = 0; y = 0; z = -1 }
+                radius = 0.5 } ]
 
 let focalLength = 1.
 let viewportHeight = 2.
@@ -69,6 +68,8 @@ let logger (remaining: int) =
     eprintfn $"Scanlines remaining: {remaining}"
 
 let body =
+    let rayColor = rayColor world
+
     seq {
         for j in 0 .. imageHeight - 1 do
             logger (imageHeight - j)
