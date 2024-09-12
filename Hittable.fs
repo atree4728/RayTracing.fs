@@ -114,7 +114,14 @@ let tryGetScattered
             let cos = dot -r normal
             let sin = 1. - cos * cos |> sqrt
 
-            if ri * sin > 1. then
+            let cannotRefract = ri * sin > 1
+
+            let reflectance =
+                let t = (1. - ri) / (1. + ri)
+                let r0 = t * t
+                r0 + (1. - r0) * (1. - abs cos) ** 5
+
+            if cannotRefract || reflectance > Utils.rand () then
                 let proj =
                     let cand = dot r normal * normal
                     if dot cand r >= 0 then cand else -cand

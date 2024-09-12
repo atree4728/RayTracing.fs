@@ -6,13 +6,13 @@ open Camera
 let world =
     let ground = Lambertian { albedo = { r = 0.8; g = 0.8; b = 0 } }
     let center = Lambertian { albedo = { r = 0.1; g = 0.2; b = 0.5 } }
-
-    let left = Dielectric { refractionIndex = 1. / 1.33 }
+    let left = Dielectric { refractionIndex = 1.50 }
+    let bubble = Dielectric { refractionIndex = 1. / 1.5 }
 
     let right =
         Metal
             { albedo = { r = 0.8; g = 0.6; b = 0.2 }
-              fuzz = 1 }
+              fuzz = 0 }
 
     Hittables
         [ Sphere
@@ -27,6 +27,10 @@ let world =
               { center = { x = -1; y = 0; z = -1 }
                 radius = 0.5
                 material = left }
+          Sphere
+              { center = { x = -1; y = 0; z = -1 }
+                radius = 0.4
+                material = bubble }
           Sphere
               { center = { x = 1; y = 0; z = -1 }
                 radius = 0.5

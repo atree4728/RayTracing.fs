@@ -73,8 +73,7 @@ let render logger camera world =
         logger $"Scanlines remaining: {remaining}"
 
     let body =
-        let rng = System.Random()
-        let rand () = rng.NextDouble() - 0.5
+        let rand () = Utils.rand () - 0.5
 
         seq {
             for j in 0 .. camera.imageHeight - 1 do

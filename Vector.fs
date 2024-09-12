@@ -45,8 +45,7 @@ let norm = normSquared >> sqrt
 let normalize v = v / (norm v) |> UnitVector
 
 let randomUnitVector =
-    let rng = System.Random()
-    let rand () = rng.NextDouble() * 2. - 1.
+    let rand () = Utils.rand () * 2. - 1.
 
     fun () ->
         Seq.initInfinite (fun _ ->
