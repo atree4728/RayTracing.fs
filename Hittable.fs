@@ -103,7 +103,7 @@ let tryGetScattered
     | Dielectric { refractionIndex = refractionIndex } ->
         let attenuation = Color.white
 
-        let (UnitVector refracted) =
+        let out =
             let ri =
                 if dot direction normal > 0 then
                     refractionIndex
@@ -111,17 +111,24 @@ let tryGetScattered
                     1.0 / refractionIndex
 
             let (UnitVector r) = normalize direction
-            let perp = ri * (r - dot r normal * normal)
+            let cos = dot -r normal
+            let sin = 1. - cos * cos |> sqrt
 
-            let prll =
-                sqrt (1. - normSquared perp)
-                * normal
-                * if dot direction normal > 0 then 1. else -1.
+            if ri * sin > 1. then
+                let proj =
+                    let cand = dot r normal * normal
+                    if dot cand r >= 0 then cand else -cand
 
-            perp + prll |> UnitVector
+                r - proj * 2.
+            else
+                let perp = ri * (r + cos * normal)
 
-        let ray =
-            { origin = point
-              direction = refracted }
+                let prll =
+                    let cand = sqrt (1. - normSquared perp) * normal
+                    if dot cand r >= 0 then cand else -cand
+
+                perp + prll
+
+        let ray = { origin = point; direction = out }
 
         Some { attenuation = attenuation; ray = ray }
