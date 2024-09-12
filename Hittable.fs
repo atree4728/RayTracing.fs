@@ -8,10 +8,12 @@ open Color
 
 type Lambertian = { albedo: Color }
 type Metal = { albedo: Color; fuzz: float }
+type Dielectric = { refractionIndex: float }
 
 type Material =
     | Lambertian of Lambertian
     | Metal of Metal
+    | Dielectric of Dielectric
 
 type Sphere =
     { center: Vector
@@ -69,27 +71,27 @@ let rec tryGetHit interval ray object =
 type Scattered = { attenuation: Color; ray: Ray }
 
 let tryGetScattered
-    rayIn
+    { direction = direction }
     { point = point
       normal = UnitVector normal
       material = material }
     =
     match material with
     | Lambertian { albedo = albedo } ->
-        let direction =
+        let reflected =
             let (UnitVector randamized) = randomUnitVector ()
             let vector = normal + randamized
             if isNearZero vector then normal else vector
 
         let ray =
             { origin = point
-              direction = direction }
+              direction = reflected }
 
         Some { attenuation = albedo; ray = ray }
     | Metal { albedo = albedo; fuzz = fuzz } ->
         let reflected =
-            let proj = dot rayIn.direction normal * normal
-            let (UnitVector direction) = rayIn.direction - proj * 2. |> normalize
+            let proj = dot direction normal * normal
+            let (UnitVector direction) = direction - proj * 2. |> normalize
             let (UnitVector randamized) = randomUnitVector ()
             direction + fuzz * randamized
 
@@ -98,3 +100,28 @@ let tryGetScattered
               direction = reflected }
 
         Some { attenuation = albedo; ray = ray }
+    | Dielectric { refractionIndex = refractionIndex } ->
+        let attenuation = Color.white
+
+        let (UnitVector refracted) =
+            let ri =
+                if dot direction normal > 0 then
+                    refractionIndex
+                else
+                    1.0 / refractionIndex
+
+            let (UnitVector r) = normalize direction
+            let perp = ri * (r - dot r normal * normal)
+
+            let prll =
+                sqrt (1. - normSquared perp)
+                * normal
+                * if dot direction normal > 0 then 1. else -1.
+
+            perp + prll |> UnitVector
+
+        let ray =
+            { origin = point
+              direction = refracted }
+
+        Some { attenuation = attenuation; ray = ray }

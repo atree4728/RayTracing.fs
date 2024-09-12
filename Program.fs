@@ -7,10 +7,7 @@ let world =
     let ground = Lambertian { albedo = { r = 0.8; g = 0.8; b = 0 } }
     let center = Lambertian { albedo = { r = 0.1; g = 0.2; b = 0.5 } }
 
-    let left =
-        Metal
-            { albedo = { r = 0.8; g = 0.8; b = 0.8 }
-              fuzz = 0.3 }
+    let left = Dielectric { refractionIndex = 1.5 }
 
     let right =
         Metal
