@@ -22,3 +22,5 @@ type Color =
           b = t * color.b }
 
     static member inline (/)(color: Color, t) = (1. / t) * color
+
+let gammanize { r = r; g = g; b = b } = { r = sqrt r; g = sqrt g; b = sqrt b }

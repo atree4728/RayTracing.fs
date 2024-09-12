@@ -63,7 +63,7 @@ let rec rayColor camera world depth ray =
               direction = direction }
 
         let color = rayColor camera world (depth - 1) reflected
-        0.5 * color
+        0.1 * color
     | false, None ->
         let unitDirection = normalize ray.direction
         let scaler = (unitDirection.y + 1.) / 2.
@@ -103,7 +103,7 @@ let render logger camera world =
                         |> Seq.map (rayColor camera world camera.maxDepth)
                         |> Seq.reduce (+)
 
-                    let color = colors / float camera.samplesPerPixel
+                    let color = colors / float camera.samplesPerPixel |> gammanize
                     $"{color}\n"
         }
         |> Seq.reduce (+)
