@@ -4,8 +4,19 @@ open FsToolkit.ErrorHandling
 
 open Vector
 open Ray
+open Color
 
-type Sphere = { center: Vector; radius: float }
+type Lambertian = { albedo: Color }
+type Metal = { albedo: Color }
+
+type Material =
+    | Lambertian of Lambertian
+    | Metal of Metal
+
+type Sphere =
+    { center: Vector
+      radius: float
+      material: Material }
 
 type Hittable =
     | Sphere of Sphere
@@ -14,13 +25,16 @@ type Hittable =
 type Hit =
     { point: Vector
       normal: UnitVector
+      material: Material
       t: float }
 
 type Interval = { min: float; max: float }
 
 let rec tryGetHit interval ray object =
     match object with
-    | Sphere { center = center; radius = radius } ->
+    | Sphere { center = center
+               radius = radius
+               material = material } ->
         let oc = center - ray.origin
         let a = ray.direction |> normSquared
         let h = dot ray.direction oc
@@ -42,6 +56,7 @@ let rec tryGetHit interval ray object =
             return
                 { point = point
                   normal = normal
+                  material = material
                   t = t }
         }
     | Hittables hittables ->
@@ -50,3 +65,34 @@ let rec tryGetHit interval ray object =
         |> function
             | [] -> None
             | hits -> hits |> List.minBy _.t |> Some
+
+type Scattered = { attenuation: Color; ray: Ray }
+
+let tryGetScattered
+    rayIn
+    { point = point
+      normal = UnitVector normal
+      material = material }
+    =
+    match material with
+    | Lambertian { albedo = albedo } ->
+        let direction =
+            let (UnitVector randamized) = randomUnitVector ()
+            let vector = normal + randamized
+            if isNearZero vector then normal else vector
+
+        let ray =
+            { origin = point
+              direction = direction }
+
+        Some { attenuation = albedo; ray = ray }
+    | Metal { albedo = albedo } ->
+        let reflected =
+            let proj = dot rayIn.direction normal * normal
+            rayIn.direction - proj * 2.
+
+        let ray =
+            { origin = point
+              direction = reflected }
+
+        Some { attenuation = albedo; ray = ray }

@@ -57,3 +57,7 @@ let randomUnitVector =
             let lsq = normSquared p
             1e-160 < lsq && lsq <= 1)
         |> normalize
+
+let isNearZero v =
+    let s = 1e-8
+    abs v.x < s && abs v.y < s && abs v.z < s

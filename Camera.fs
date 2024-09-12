@@ -47,30 +47,21 @@ type Camera =
           pixelDeltaV = pixelDeltaV }
 
 let rec rayColor camera world depth ray =
-    let white = { r = 1; g = 1; b = 1 }
-    let blue = { r = 0.5; g = 0.7; b = 1 }
-    let black = { r = 0; g = 0; b = 0 }
-
     let interval = { min = 0.001; max = infinity }
 
     match depth <= 0, tryGetHit interval ray world with
-    | true, _ -> black
-    | false,
-      Some { point = point
-             normal = UnitVector normal } ->
-        let reflected =
-            let (UnitVector vector) = randomUnitVector ()
-            let direction = normal + vector
+    | true, _ -> Color.black
+    | false, Some hit ->
+        match tryGetScattered ray hit with
+        | Some { attenuation = attenuation; ray = ray } ->
+            let color = rayColor camera world (depth - 1) ray
+            attenuation * color
+        | None -> Color.black
 
-            { origin = point
-              direction = direction }
-
-        let color = rayColor camera world (depth - 1) reflected
-        0.1 * color
     | false, None ->
         let (UnitVector unitDirection) = normalize ray.direction
         let scaler = (unitDirection.y + 1.) / 2.
-        (1. - scaler) * white + scaler * blue
+        (1. - scaler) * Color.white + scaler * Color.blue
 
 let render logger camera world =
     let header =
