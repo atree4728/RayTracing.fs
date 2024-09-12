@@ -13,7 +13,7 @@ type Hittable =
 
 type Hit =
     { point: Vector
-      normal: Vector
+      normal: UnitVector
       t: float }
 
 type Interval = { min: float; max: float }
@@ -37,7 +37,7 @@ let rec tryGetHit interval ray object =
             let! dSqrt = trySqrt discriminant
             let! t = [ (h - dSqrt) / a; (h + dSqrt) / a ] |> List.tryPick (validate interval)
             let point = point ray t
-            let normal = (point - center) / radius
+            let normal = (point - center) / radius |> UnitVector
 
             return
                 { point = point

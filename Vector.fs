@@ -30,6 +30,8 @@ type Vector =
     static member inline (*)(v: Vector, t: float) = t * v
     static member inline (/)(v: Vector, t) = (1. / t) * v
 
+type UnitVector = UnitVector of Vector
+
 let dot u v = u.x * v.x + u.y * v.y + u.z * v.z
 
 let cross u v =
@@ -40,7 +42,7 @@ let cross u v =
 let normSquared v = v.x ** 2 + v.y ** 2 + v.z ** 2
 let norm = normSquared >> sqrt
 
-let normalize v = v / (norm v)
+let normalize v = v / (norm v) |> UnitVector
 
 let randomUnitVector =
     let rng = System.Random()

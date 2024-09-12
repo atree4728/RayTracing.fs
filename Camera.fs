@@ -55,9 +55,12 @@ let rec rayColor camera world depth ray =
 
     match depth <= 0, tryGetHit interval ray world with
     | true, _ -> black
-    | false, Some { point = point; normal = normal } ->
+    | false,
+      Some { point = point
+             normal = UnitVector normal } ->
         let reflected =
-            let direction = normal + randomUnitVector ()
+            let (UnitVector vector) = randomUnitVector ()
+            let direction = normal + vector
 
             { origin = point
               direction = direction }
@@ -65,7 +68,7 @@ let rec rayColor camera world depth ray =
         let color = rayColor camera world (depth - 1) reflected
         0.1 * color
     | false, None ->
-        let unitDirection = normalize ray.direction
+        let (UnitVector unitDirection) = normalize ray.direction
         let scaler = (unitDirection.y + 1.) / 2.
         (1. - scaler) * white + scaler * blue
 
