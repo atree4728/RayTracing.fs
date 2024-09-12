@@ -56,22 +56,8 @@ let rec rayColor camera world depth ray =
     match depth <= 0, tryGetHit interval ray world with
     | true, _ -> black
     | false, Some { point = point; normal = normal } ->
-        let rng = System.Random()
-        let rand () = rng.NextDouble() * 2. - 1.
-
         let reflected =
-            let direction =
-                let p =
-                    Seq.initInfinite (fun _ ->
-                        { x = rand ()
-                          y = rand ()
-                          z = rand () })
-                    |> Seq.find (fun p ->
-                        let lsq = normSquared p
-                        1e-160 < lsq && lsq <= 1)
-                    |> normalize
-
-                if dot p normal > 0 then p else -p
+            let direction = normal + randomUnitVector ()
 
             { origin = point
               direction = direction }

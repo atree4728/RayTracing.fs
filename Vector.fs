@@ -41,3 +41,17 @@ let normSquared v = v.x ** 2 + v.y ** 2 + v.z ** 2
 let norm = normSquared >> sqrt
 
 let normalize v = v / (norm v)
+
+let randomUnitVector =
+    let rng = System.Random()
+    let rand () = rng.NextDouble() * 2. - 1.
+
+    fun () ->
+        Seq.initInfinite (fun _ ->
+            { x = rand ()
+              y = rand ()
+              z = rand () })
+        |> Seq.find (fun p ->
+            let lsq = normSquared p
+            1e-160 < lsq && lsq <= 1)
+        |> normalize
