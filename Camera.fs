@@ -46,7 +46,7 @@ type Camera =
           pixelDeltaU = pixelDeltaU
           pixelDeltaV = pixelDeltaV }
 
-let rec rayColor camera world depth ray =
+let rec rayColor depth world ray =
     let interval = { min = 0.001; max = infinity }
 
     match depth <= 0, tryGetHit interval ray world with
@@ -54,10 +54,9 @@ let rec rayColor camera world depth ray =
     | false, Some hit ->
         match tryGetScattered ray hit with
         | Some { attenuation = attenuation; ray = ray } ->
-            let color = rayColor camera world (depth - 1) ray
+            let color = rayColor (depth - 1) world ray
             attenuation * color
         | None -> Color.black
-
     | false, None ->
         let (UnitVector unitDirection) = normalize ray.direction
         let scaler = (unitDirection.y + 1.) / 2.
@@ -94,7 +93,7 @@ let render logger camera world =
 
                             { origin = origin
                               direction = direction })
-                        |> Seq.map (rayColor camera world camera.maxDepth)
+                        |> Seq.map (rayColor camera.maxDepth world)
                         |> Seq.reduce (+)
 
                     let color = colors / float camera.samplesPerPixel |> gammanize

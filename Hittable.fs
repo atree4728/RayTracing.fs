@@ -7,7 +7,7 @@ open Ray
 open Color
 
 type Lambertian = { albedo: Color }
-type Metal = { albedo: Color }
+type Metal = { albedo: Color; fuzz: float }
 
 type Material =
     | Lambertian of Lambertian
@@ -86,10 +86,12 @@ let tryGetScattered
               direction = direction }
 
         Some { attenuation = albedo; ray = ray }
-    | Metal { albedo = albedo } ->
+    | Metal { albedo = albedo; fuzz = fuzz } ->
         let reflected =
             let proj = dot rayIn.direction normal * normal
-            rayIn.direction - proj * 2.
+            let (UnitVector direction) = rayIn.direction - proj * 2. |> normalize
+            let (UnitVector randamized) = randomUnitVector ()
+            direction + fuzz * randamized
 
         let ray =
             { origin = point
