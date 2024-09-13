@@ -12,17 +12,20 @@ type Camera =
       samplesPerPixel: int
       maxDepth: int
       center: Vector
+      vFov: float<Utils.deg>
       pixel00Loc: Vector
       pixelDeltaU: Vector
       pixelDeltaV: Vector }
 
-    static member create aspectRatio imageWidth samplesPerPixel maxDepth =
+    static member create aspectRatio imageWidth samplesPerPixel maxDepth vFov =
         let imageHeight = float imageWidth / aspectRatio |> int |> max 1
         let center = { x = 0; y = 0; z = 0 }
         let aspectRatio = float imageWidth / float imageHeight
 
         let focalLength = 1.
-        let viewportHeight = 2.
+        let theta = vFov |> Utils.toRad
+        let h = theta / 2.<Utils.rad> |> tan
+        let viewportHeight = 2. * h * focalLength
         let viewportWidth = viewportHeight * aspectRatio
 
         let viewportU = { x = viewportWidth; y = 0; z = 0 }
@@ -42,6 +45,7 @@ type Camera =
           samplesPerPixel = samplesPerPixel
           maxDepth = maxDepth
           center = center
+          vFov = vFov
           pixel00Loc = pixel00Loc
           pixelDeltaU = pixelDeltaU
           pixelDeltaV = pixelDeltaV }
