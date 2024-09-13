@@ -13,29 +13,36 @@ type Camera =
       maxDepth: int
       center: Vector
       vFov: float<Utils.deg>
+      lookFrom: Vector
+      lookAt: Vector
+      vUp: Vector
       pixel00Loc: Vector
       pixelDeltaU: Vector
-      pixelDeltaV: Vector }
+      pixelDeltaV: Vector
+      basis: {| u: Vector; v: Vector; w: Vector |} }
 
-    static member create aspectRatio imageWidth samplesPerPixel maxDepth vFov =
+    static member create aspectRatio imageWidth samplesPerPixel maxDepth vFov lookFrom lookAt vUp =
         let imageHeight = float imageWidth / aspectRatio |> int |> max 1
-        let center = { x = 0; y = 0; z = 0 }
+        let center = lookFrom
         let aspectRatio = float imageWidth / float imageHeight
 
-        let focalLength = 1.
+        let focalLength = lookFrom - lookAt |> norm
         let theta = vFov |> Utils.toRad
         let h = theta / 2.<Utils.rad> |> tan
         let viewportHeight = 2. * h * focalLength
         let viewportWidth = viewportHeight * aspectRatio
 
-        let viewportU = { x = viewportWidth; y = 0; z = 0 }
-        let viewportV = { x = 0; y = -viewportHeight; z = 0 }
+        let (UnitVector w) = lookFrom - lookAt |> normalize
+        let (UnitVector u) = cross vUp w |> normalize
+        let v = cross w u
+
+        let viewportU = viewportWidth * u
+        let viewportV = viewportHeight * -v
 
         let pixelDeltaU = viewportU / float imageWidth
         let pixelDeltaV = viewportV / float imageHeight
 
-        let viewportUpperLeft =
-            center - { x = 0; y = 0; z = focalLength } - viewportU / 2. - viewportV / 2.
+        let viewportUpperLeft = center - focalLength * w - viewportU / 2. - viewportV / 2.
 
         let pixel00Loc = viewportUpperLeft + (pixelDeltaU + pixelDeltaV) * 0.5
 
@@ -46,9 +53,13 @@ type Camera =
           maxDepth = maxDepth
           center = center
           vFov = vFov
+          lookFrom = lookFrom
+          lookAt = lookAt
+          vUp = vUp
           pixel00Loc = pixel00Loc
           pixelDeltaU = pixelDeltaU
-          pixelDeltaV = pixelDeltaV }
+          pixelDeltaV = pixelDeltaV
+          basis = {| u = u; v = v; w = w |} }
 
 let rec rayColor depth world ray =
     let interval = { min = 0.001; max = infinity }
