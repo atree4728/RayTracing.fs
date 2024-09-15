@@ -44,18 +44,17 @@ let norm = normSquared >> sqrt
 
 let normalize v = v / (norm v) |> UnitVector
 
-let randomUnitVector =
+let randomUnitVector () =
     let rand () = Utils.rand () * 2. - 1.
 
-    fun () ->
-        Seq.initInfinite (fun _ ->
-            { x = rand ()
-              y = rand ()
-              z = rand () })
-        |> Seq.find (fun p ->
-            let lsq = normSquared p
-            1e-160 < lsq && lsq <= 1)
-        |> normalize
+    Seq.initInfinite (fun _ ->
+        { x = rand ()
+          y = rand ()
+          z = rand () })
+    |> Seq.find (fun p ->
+        let lsq = normSquared p
+        1e-160 < lsq && lsq <= 1)
+    |> normalize
 
 let isNearZero v =
     let s = 1e-8

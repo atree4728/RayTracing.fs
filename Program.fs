@@ -45,8 +45,10 @@ let camera =
     let lookFrom = { x = -2; y = 2; z = 1 }
     let lookAt = { x = 0; y = 0; z = -1 }
     let vUp = { x = 0; y = 1; z = 0 }
+    let defocusAngle = 10.<Utils.deg>
+    let focusDistance = 3.4
 
-    Camera.create aspectRatio imageWidth samplesPerPixel maxDepth vFov lookFrom lookAt vUp
+    Camera.create aspectRatio imageWidth samplesPerPixel maxDepth vFov lookFrom lookAt vUp defocusAngle focusDistance
 
 let logger = eprintfn "%s"
 let image = render logger camera world

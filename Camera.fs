@@ -16,20 +16,34 @@ type Camera =
       lookFrom: Vector
       lookAt: Vector
       vUp: Vector
+      defocusAngle: float<Utils.deg>
+      focusDistance: float
       pixel00Loc: Vector
       pixelDeltaU: Vector
       pixelDeltaV: Vector
-      basis: {| u: Vector; v: Vector; w: Vector |} }
+      basis: {| u: Vector; v: Vector; w: Vector |}
+      defocusDiskU: Vector
+      defocusDiskV: Vector }
 
-    static member create aspectRatio imageWidth samplesPerPixel maxDepth vFov lookFrom lookAt vUp =
+    static member create
+        aspectRatio
+        imageWidth
+        samplesPerPixel
+        maxDepth
+        vFov
+        lookFrom
+        lookAt
+        vUp
+        defocusAngle
+        focusDistance
+        =
         let imageHeight = float imageWidth / aspectRatio |> int |> max 1
         let center = lookFrom
         let aspectRatio = float imageWidth / float imageHeight
 
-        let focalLength = lookFrom - lookAt |> norm
         let theta = vFov |> Utils.toRad
         let h = theta / 2.<Utils.rad> |> tan
-        let viewportHeight = 2. * h * focalLength
+        let viewportHeight = 2. * h * focusDistance
         let viewportWidth = viewportHeight * aspectRatio
 
         let (UnitVector w) = lookFrom - lookAt |> normalize
@@ -42,7 +56,13 @@ type Camera =
         let pixelDeltaU = viewportU / float imageWidth
         let pixelDeltaV = viewportV / float imageHeight
 
-        let viewportUpperLeft = center - focalLength * w - viewportU / 2. - viewportV / 2.
+        let viewportUpperLeft = center - focusDistance * w - viewportU / 2. - viewportV / 2.
+
+        let defocusRadius =
+            Utils.toRad defocusAngle / 2.<Utils.rad> |> tan |> (*) focusDistance
+
+        let defocusDiskU = u * defocusRadius
+        let defocusDiskV = v * defocusRadius
 
         let pixel00Loc = viewportUpperLeft + (pixelDeltaU + pixelDeltaV) * 0.5
 
@@ -56,10 +76,14 @@ type Camera =
           lookFrom = lookFrom
           lookAt = lookAt
           vUp = vUp
+          defocusAngle = defocusAngle
+          focusDistance = focusDistance
           pixel00Loc = pixel00Loc
           pixelDeltaU = pixelDeltaU
           pixelDeltaV = pixelDeltaV
-          basis = {| u = u; v = v; w = w |} }
+          basis = {| u = u; v = v; w = w |}
+          defocusDiskU = defocusDiskU
+          defocusDiskV = defocusDiskV }
 
 let rec rayColor depth world ray =
     let interval = { min = 0.001; max = infinity }
@@ -102,7 +126,18 @@ let render logger camera world =
                                 + (float i + rand ()) * camera.pixelDeltaU
                                 + (float j + rand ()) * camera.pixelDeltaV
 
-                            let origin = camera.center
+                            let origin =
+                                if camera.defocusAngle <= 0.<Utils.deg> then
+                                    camera.center
+                                else
+                                    let p =
+                                        let rand () = Utils.rand () * 2. - 1.
+
+                                        Seq.initInfinite (fun _ -> { x = rand (); y = rand (); z = 0 })
+                                        |> Seq.find (fun p -> normSquared p < 1)
+
+                                    camera.center + p.x * camera.defocusDiskU + p.y * camera.defocusDiskV
+
                             let direction = pixel - origin
 
                             { origin = origin
