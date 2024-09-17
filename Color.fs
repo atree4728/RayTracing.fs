@@ -32,4 +32,9 @@ type Color =
     static member blue = { r = 0.5; g = 0.7; b = 1 }
     static member white = { r = 1; g = 1; b = 1 }
 
+    static member random() =
+        { r = Utils.rand ()
+          g = Utils.rand ()
+          b = Utils.rand () }
+
 let gammanize { r = r; g = g; b = b } = { r = sqrt r; g = sqrt g; b = sqrt b }

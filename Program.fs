@@ -1,52 +1,83 @@
 ﻿open Vector
 open Hittable
 open Camera
-
+open Color
 
 let world =
-    let ground = Lambertian { albedo = { r = 0.8; g = 0.8; b = 0 } }
-    let center = Lambertian { albedo = { r = 0.1; g = 0.2; b = 0.5 } }
-    let left = Dielectric { refractionIndex = 1.5 }
-    let bubble = Dielectric { refractionIndex = 1. / 1.5 }
+    let ground =
+        let material = Lambertian { albedo = { r = 0.5; g = 0.5; b = 0.5 } }
 
-    let right =
-        Metal
-            { albedo = { r = 0.8; g = 0.6; b = 0.2 }
-              fuzz = 1. }
+        Sphere
+            { center = { x = 0; y = -1000; z = -1 }
+              radius = 1000
+              material = material }
 
-    Hittables
-        [ Sphere
-              { center = { x = 0; y = -100.5; z = -1 }
-                radius = 100
-                material = ground }
+    let smalls =
+        seq {
+            for a in -11 .. 10 do
+                for b in -11 .. 10 do
+                    let center =
+                        { x = float a + 0.9 * Utils.rand ()
+                          y = 0.2
+                          z = float b + 0.9 * Utils.rand () }
+
+                    if norm (center - { x = 4; y = 0.2; z = 0 }) > 0.9 then
+                        let material =
+                            match Utils.rand () with
+                            | p when p < 0.8 ->
+                                let albedo = Color.random () * Color.random ()
+                                Lambertian { albedo = albedo }
+                            | p when p < 0.95 ->
+                                let albedo = Color.random () / 2. + { r = 0.5; g = 0.5; b = 0.5 }
+                                let fuzz = Utils.rand () / 2.
+                                Metal { albedo = albedo; fuzz = fuzz }
+                            | _ -> Dielectric { refractionIndex = 1.5 }
+
+                        Sphere
+                            { center = center
+                              radius = 0.2
+                              material = material }
+        }
+        |> Seq.toList
+
+    let larges =
+        [ let material = Dielectric { refractionIndex = 1.5 }
+
           Sphere
-              { center = { x = 0; y = 0; z = -1.2 }
-                radius = 0.5
-                material = center }
+              { center = { x = 0; y = 1; z = 0 }
+                radius = 1
+                material = material }
+
+          let material = Lambertian { albedo = { r = 0.4; g = 0.2; b = 0.1 } }
+
           Sphere
-              { center = { x = -1; y = 0; z = -1 }
-                radius = 0.5
-                material = left }
+              { center = { x = -4; y = 1; z = 0 }
+                radius = 1
+                material = material }
+
+          let material =
+              Metal
+                  { albedo = { r = 0.7; g = 0.6; b = 0.5 }
+                    fuzz = 0 }
+
           Sphere
-              { center = { x = -1; y = 0; z = -1 }
-                radius = 0.4
-                material = bubble }
-          Sphere
-              { center = { x = 1; y = 0; z = -1 }
-                radius = 0.5
-                material = right } ]
+              { center = { x = 4; y = 1; z = 0 }
+                radius = 1
+                material = material } ]
+
+    ground :: smalls @ larges |> Hittables
 
 let camera =
     let aspectRatio = 16. / 9.
-    let imageWidth = 400
-    let samplesPerPixel = 100
+    let imageWidth = 1200
+    let samplesPerPixel = 500
     let maxDepth = 50
     let vFov = 20.<Utils.deg>
-    let lookFrom = { x = -2; y = 2; z = 1 }
-    let lookAt = { x = 0; y = 0; z = -1 }
+    let lookFrom = { x = 13; y = 2; z = 3 }
+    let lookAt = { x = 0; y = 0; z = 0 }
     let vUp = { x = 0; y = 1; z = 0 }
-    let defocusAngle = 10.<Utils.deg>
-    let focusDistance = 3.4
+    let defocusAngle = 0.6<Utils.deg>
+    let focusDistance = 10
 
     Camera.create aspectRatio imageWidth samplesPerPixel maxDepth vFov lookFrom lookAt vUp defocusAngle focusDistance
 
