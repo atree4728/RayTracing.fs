@@ -4,13 +4,13 @@
     <TargetFramework>net8.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Utils.fs" />
-    <Compile Include="Color.fs" />
-    <Compile Include="Vector.fs" />
-    <Compile Include="Ray.fs" />
-    <Compile Include="Hittable.fs" />
-    <Compile Include="Camera.fs" />
-    <Compile Include="Program.fs" />
+    <Compile Include="src/Utils.fs" />
+    <Compile Include="src/Color.fs" />
+    <Compile Include="src/Vector.fs" />
+    <Compile Include="src/Ray.fs" />
+    <Compile Include="src/Hittable.fs" />
+    <Compile Include="src/Camera.fs" />
+    <Compile Include="src/Program.fs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="FsToolkit.ErrorHandling" Version="4.16.0" />
