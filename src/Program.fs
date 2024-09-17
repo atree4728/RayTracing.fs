@@ -65,7 +65,7 @@ let world =
                 radius = 1
                 material = material } ]
 
-    ground :: smalls @ larges |> Hittables
+    ground :: smalls @ larges |> List.toArray |> Hittables
 
 let camera =
     let aspectRatio = 16. / 9.

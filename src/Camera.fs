@@ -108,46 +108,50 @@ let render logger camera world =
 255
 """
 
-    let logger (remaining: int) =
-        logger $"Scanlines remaining: {remaining}"
+    let logger (j: int) =
+        logger $"Scanlines remaining: {camera.imageHeight - j}"
+
+    let rand () = Utils.rand () - 0.5
+
+    let rayTrace (i, j) =
+        let colors =
+            Seq.init camera.samplesPerPixel (fun _ ->
+                let pixel =
+                    camera.pixel00Loc
+                    + (float i + rand ()) * camera.pixelDeltaU
+                    + (float j + rand ()) * camera.pixelDeltaV
+
+                let origin =
+                    if camera.defocusAngle <= 0.<Utils.deg> then
+                        camera.center
+                    else
+                        let p =
+                            let rand () = Utils.rand () * 2. - 1.
+
+                            let rec find () =
+                                let p = { x = rand (); y = rand (); z = 0 }
+                                if normSquared p < 1 then p else find ()
+
+                            find ()
+
+                        camera.center + p.x * camera.defocusDiskU + p.y * camera.defocusDiskV
+
+                let direction = pixel - origin
+
+                { origin = origin
+                  direction = direction })
+            |> Seq.map (rayColor camera.maxDepth world)
+            |> Seq.reduce (+)
+
+        let color = colors / float camera.samplesPerPixel |> gammanize
+        color
 
     let body =
-        let rand () = Utils.rand () - 0.5
+        Array.init camera.imageHeight (fun j ->
+            logger j
 
-        seq {
-            for j in 0 .. camera.imageHeight - 1 do
-                logger (camera.imageHeight - j)
-
-                for i in 0 .. camera.imageWidth - 1 do
-                    let colors =
-                        Seq.init camera.samplesPerPixel (fun _ ->
-                            let pixel =
-                                camera.pixel00Loc
-                                + (float i + rand ()) * camera.pixelDeltaU
-                                + (float j + rand ()) * camera.pixelDeltaV
-
-                            let origin =
-                                if camera.defocusAngle <= 0.<Utils.deg> then
-                                    camera.center
-                                else
-                                    let p =
-                                        let rand () = Utils.rand () * 2. - 1.
-
-                                        Seq.initInfinite (fun _ -> { x = rand (); y = rand (); z = 0 })
-                                        |> Seq.find (fun p -> normSquared p < 1)
-
-                                    camera.center + p.x * camera.defocusDiskU + p.y * camera.defocusDiskV
-
-                            let direction = pixel - origin
-
-                            { origin = origin
-                              direction = direction })
-                        |> Seq.map (rayColor camera.maxDepth world)
-                        |> Seq.reduce (+)
-
-                    let color = colors / float camera.samplesPerPixel |> gammanize
-                    $"{color}\n"
-        }
-        |> Seq.reduce (+)
+            Array.Parallel.init camera.imageWidth (fun i -> (i, j) |> rayTrace |> string |> sprintf "%s\n")
+            |> Array.reduce (+))
+        |> Array.reduce (+)
 
     header + body

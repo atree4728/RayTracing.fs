@@ -15,4 +15,9 @@
   <ItemGroup>
     <PackageReference Include="FsToolkit.ErrorHandling" Version="4.16.0" />
   </ItemGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <Optimize>true</Optimize>
+    <Tailcalls>true</Tailcalls>
+    <OtherFlags>--crossoptimize+</OtherFlags>
+  </PropertyGroup>
 </Project>

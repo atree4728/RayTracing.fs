@@ -47,14 +47,16 @@ let normalize v = v / (norm v) |> UnitVector
 let randomUnitVector () =
     let rand () = Utils.rand () * 2. - 1.
 
-    Seq.initInfinite (fun _ ->
-        { x = rand ()
-          y = rand ()
-          z = rand () })
-    |> Seq.find (fun p ->
+    let rec find () =
+        let p =
+            { x = rand ()
+              y = rand ()
+              z = rand () }
+
         let lsq = normSquared p
-        1e-160 < lsq && lsq <= 1)
-    |> normalize
+        if 1e-160 < lsq && lsq <= 1 then p else find ()
+
+    find () |> normalize
 
 let isNearZero v =
     let s = 1e-8

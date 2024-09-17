@@ -22,7 +22,7 @@ type Sphere =
 
 type Hittable =
     | Sphere of Sphere
-    | Hittables of Hittable list
+    | Hittables of Hittable array
 
 type Hit =
     { point: Vector
@@ -63,10 +63,10 @@ let rec tryGetHit interval ray object =
         }
     | Hittables hittables ->
         hittables
-        |> List.choose (tryGetHit interval ray)
+        |> Array.choose (tryGetHit interval ray)
         |> function
-            | [] -> None
-            | hits -> hits |> List.minBy _.t |> Some
+            | [||] -> None
+            | hits -> hits |> Array.minBy _.t |> Some
 
 type Scattered = { attenuation: Color; ray: Ray }
 
